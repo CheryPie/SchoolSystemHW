@@ -21,7 +21,7 @@ public class Faculty implements Serializable {
 	private String name;
 
 	//bi-directional many-to-one association to Student
-	@OneToMany(mappedBy="faculty")
+	@OneToMany(mappedBy="faculty",orphanRemoval=true,cascade=CascadeType.REMOVE)
 	private List<Student> students;
 
 	public Faculty() {

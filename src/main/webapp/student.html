@@ -18,7 +18,7 @@
 
 	function drawTable(data) {
 		for (var i = 0; i < data.length; i++) {
-			drawRow(data[i],i);
+			drawRow(data[i], i);
 		}
 	}
 
@@ -30,6 +30,24 @@
 		row.append($("<td>" + rowData.fkNumber + "</td>"));
 		row.append($("<td><form role=\"form\" action=\"StudentServlet\" method=\"post\"><input type=\"hidden\" name=\"deleted\" value=\""+rowData.studentId+"\"/><button type=\"submit\" class=\"btn btn-default\">Изтрий</button></form></td>"));
 	}
+</script>
+
+<script type="text/javascript">
+	$.ajax({
+		url : '/Shit/FacultyServlet',
+		type : "GET",
+		dataType : "json",
+		success : function(data, textStatus, jqXHR) {
+			drawDropDown(data);
+		}
+	});
+	
+	function drawDropDown(data){
+	    $.each(data, function(i, option) {
+	        $('#sel').append($('<option/>').attr("value", option.facultyId).text(option.name));
+	    });
+	}
+	
 </script>
 </head>
 <body>
@@ -43,15 +61,19 @@
 				class="form-control" name="fkNumber" id="userName">
 		</div>
 		<div class="form-group">
-			<label for="pwd">Име:</label> <input type="text"
-				class="form-control" name="firstName" id="pwd">
+			<label for="pwd">Име:</label> <input type="text" class="form-control"
+				name="firstName" id="pwd">
 		</div>
 
 		<div class="form-group">
 			<label for="conf_pwd">Фамилия</label> <input type="text"
 				class="form-control" name="lastName" id="conf_pwd">
 		</div>
-
+		<div class="form-group">
+			<label for="dropdown">Факултет</label><select id="sel"
+				class="form_control" name="facultyId" id="dropdown">
+			</select>
+		</div>
 		<button type="reset" class="btn btn-default">Reset</button>
 		<button type="submit" class="btn btn-default">Submit</button>
 	</form>
@@ -64,7 +86,7 @@
 				<th>Име</th>
 				<th>Фамилия</th>
 				<th>Факултетен</th>
-				<th>Изтрий</th> 
+				<th>Изтрий</th>
 			</tr>
 		</table>
 	</div>
