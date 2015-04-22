@@ -22,16 +22,63 @@
 		}
 	}
 
-	function drawRow(rowData) {
-		var row = $("<tr />")
+	function drawRow(rowData, i) {
+		var row = $("<tr onclick='rowSelector(" + i + ");'/>")
 		$("#books_table").append(row);
 		row.append($("<td>" + rowData.firstName + "</td>"));
 		row.append($("<td>" + rowData.lastName + "</td>"));
 		row.append($("<td>" + rowData.fkNumber + "</td>"));
+		row.append($("<td>" + rowData.faculty.name + "</td>"));
 		row.append($("<td><form role=\"form\" action=\"StudentServlet\" method=\"post\"><input type=\"hidden\" name=\"deleted\" value=\""+rowData.studentId+"\"/><button type=\"submit\" class=\"btn btn-default\">Изтрий</button></form></td>"));
 	}
 </script>
+<!--  <script type="text/javascript">
+	function rowSelector() {
+		if (!document.getElementsByTagName || !document.createTextNode)
+			return;
+		var rows = document.getElementById('books_table').getElementsByTagName(
+				'tbody')[0].getElementsByTagName('tr');
+		for (i = 0; i < rows.length; i++) {
+			rows[i].onclick = function() {
+				var tds = rows[i].getElementByTagName('td');
+				document.getElementById('userName').value = tds[0].innerText;
+				document.getElementById('pwd').value = tds[1].innerText;
+				document.getElementById('conf_pwd').value = tds[2].innerText;
+			}
+		}
+	}
+</script>-->
+<!--  <script type="text/javascript">
+	function addRowHandlers() {
+		var table = document.getElementById("tableId");
+		var rows = table.getElementsByTagName("tr");
+		for (i = 0; i < rows.length; i++) {
+			var currentRow = table.rows[i];
+			var createClickHandler = function(row) {
+				return function() {
+					var tds = row.getElementsByTagName("td");
+					document.getElementById('userName').value = tds[0].innerText;
+					document.getElementById('pwd').value = tds[1].innerText;
+					document.getElementById('conf_pwd').value = tds[2].innerText;
+				};
+			};
 
+			currentRow.onclick = createClickHandler(currentRow);
+		}
+	}
+	window.onload = addRowHandlers();
+</script>-->
+<script type="text/javascript">
+	function rowSelector(index) {
+		var table = document.getElementById("books_table");
+		var row = table.getElementsByTagName("tr")[index];
+		var tds = row.getElementsByTagName("td");
+		document.getElementById('userName').value = tds[2].innerHTML;
+		document.getElementById('pwd').value = tds[0].innerHTML;
+		document.getElementById('conf_pwd').value = tds[1].innerHTML;
+		document.getElementById('studentId').value = tds[3].getElementByTag("form").getElementByTag("input").value;
+	}
+</script>
 <script type="text/javascript">
 	$.ajax({
 		url : '/Shit/FacultyServlet',
@@ -41,13 +88,14 @@
 			drawDropDown(data);
 		}
 	});
-	
-	function drawDropDown(data){
-	    $.each(data, function(i, option) {
-	        $('#sel').append($('<option/>').attr("value", option.facultyId).text(option.name));
-	    });
+
+	function drawDropDown(data) {
+		$.each(data, function(i, option) {
+			$('#sel').append(
+					$('<option/>').attr("value", option.facultyId).text(
+							option.name));
+		});
 	}
-	
 </script>
 </head>
 <body>
@@ -74,6 +122,7 @@
 				class="form_control" name="facultyId" id="dropdown">
 			</select>
 		</div>
+		<input type="hidden" name="studentId" />
 		<button type="reset" class="btn btn-default">Reset</button>
 		<button type="submit" class="btn btn-default">Submit</button>
 	</form>
@@ -86,6 +135,7 @@
 				<th>Име</th>
 				<th>Фамилия</th>
 				<th>Факултетен</th>
+				<th>Факултет</th>
 				<th>Изтрий</th>
 			</tr>
 		</table>

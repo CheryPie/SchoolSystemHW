@@ -1,6 +1,5 @@
 package web;
 
-
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -12,10 +11,10 @@ import javax.servlet.http.HttpServletResponse;
 import model.Student;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import dao.FacultyDAO;
 import dao.StudentDAO;
-
 
 /**
  * Servlet implementation class StudentServlet
@@ -26,7 +25,7 @@ public class StudentServlet extends HttpServlet {
 
 	private StudentDAO studentDAO;
 	private FacultyDAO facultyDAO;
-	
+
 	public StudentServlet() {
 		super();
 		studentDAO = new StudentDAO();
@@ -39,7 +38,8 @@ public class StudentServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		Gson gson = new Gson();
+		Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation()
+				.create();
 		String resource = null;
 		resource = gson.toJson(studentDAO.findAll());
 		response.setContentType("application/json");
@@ -47,36 +47,40 @@ public class StudentServlet extends HttpServlet {
 		response.getWriter().flush();
 	}
 
+	private static final String FK_NUMBER = "fkNumber";
+	private static final String FIRST_NAME = "firstName";
+	private static final String LAST_NAME = "lastName";
+	private static final String INDEX_TO_DELETE = "deleted";
+	private static final String FACULTY_ID = "facultyId";
+	private static final String STUDENT_ID = "studentId";
 
-    private static final String FK_NUMBER = "fkNumber";
-    private static final String FIRST_NAME = "firstName";
-    private static final String LAST_NAME = "lastName";
-    private static final String INDEX_TO_DELETE = "deleted";
-    private static final String FACULTY_ID="facultyId";
-    
 	protected void doPost(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		   	String fkNumber = request.getParameter(FK_NUMBER);
-	        String firstName = request.getParameter(FIRST_NAME);
-	        String lastName = request.getParameter(LAST_NAME);
-	        String facultyId = request.getParameter(FACULTY_ID);
-	        String deleted = request.getParameter(INDEX_TO_DELETE);
-	        if(studentDAO==null){
-  	        	studentDAO = new StudentDAO();
-  	        }
-	        if(deleted!=null){
-	        	Student student = studentDAO.find(new Long(deleted));
-	        	studentDAO.delete(student);
-	        }else{
-	        	Student student = new Student();
-	  	        student.setFknumber(new Integer(fkNumber));
-	  	        student.setLastName(lastName);
-	  	        student.setFirstName(firstName);
-	  	        student.setFaculty(facultyDAO.find(new Long(facultyId)));
-	  	        studentDAO.create(student);
-	        }
+		String fkNumber = request.getParameter(FK_NUMBER);
+		String firstName = request.getParameter(FIRST_NAME);
+		String lastName = request.getParameter(LAST_NAME);
+		String facultyId = request.getParameter(FACULTY_ID);
+		String deleted = request.getParameter(INDEX_TO_DELETE);
+		String id = request.getParameter(STUDENT_ID);
+		if (studentDAO == null) {
+			studentDAO = new StudentDAO();
+		}
+		if (deleted != null) {
+			Student student = studentDAO.find(new Long(deleted));
+			studentDAO.delete(student);
+		} else {
+			Student student = new Student();
+			if (id != null && !id.equals("")) {
+				student.setStudentId(new Long(id));
+			}
+			student.setFknumber(new Integer(fkNumber));
+			student.setLastName(lastName);
+			student.setFirstName(firstName);
+			student.setFaculty(facultyDAO.find(new Long(facultyId)));
+			studentDAO.create(student);
+		}
 
-	       request.getRequestDispatcher("student.html").forward(request, response);
+		request.getRequestDispatcher("student.html").forward(request, response);
 	}
 
 }

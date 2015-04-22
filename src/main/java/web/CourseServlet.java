@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import model.Course;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import dao.CourseDAO;
 
@@ -35,7 +36,7 @@ public class CourseServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		Gson gson = new Gson();
+		Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 		String resource = null;
 		resource = gson.toJson(courseDAO.findAll());
 		response.setContentType("application/json");
