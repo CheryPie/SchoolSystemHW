@@ -21,6 +21,7 @@ public class StudentDAO {
 		em.getTransaction().commit();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public List<Student> findAll(){
 		return em.createQuery("select object(s) from Student s").getResultList();
 	}
