@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
+import com.google.gson.annotations.Expose;
+
 
 /**
  * The persistent class for the COURSE database table.
@@ -20,13 +22,14 @@ public class Course implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@Expose
 	@Column(name="COURSE_ID")
 	private Long courseId;
-
+	@Expose
 	private Integer credits;
-
+	@Expose
 	private String description;
-
+	@Expose
 	private String name;
 
 	//bi-directional many-to-one association to StudentCourseRel

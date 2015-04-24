@@ -1,6 +1,8 @@
 package web;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -35,10 +37,26 @@ public class CourseServlet extends HttpServlet {
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+    
+    private static final String STUDENT_ID = "studentId";
+    
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 		String resource = null;
-		resource = gson.toJson(courseDAO.findAll());
+		List<Course> results = new ArrayList<Course>() ;
+		String id = request.getParameter(STUDENT_ID);
+		String has = request.getParameter("has");
+		if(id!=null){
+			if(has.equals("true")){
+				results = courseDAO.findByStudent(new Long(id));
+			}else{
+				results = courseDAO.findNotByStudent(new Long(id));
+			}
+		}else{
+			
+			results = courseDAO.findAll();
+		}
+		resource = gson.toJson(results);
 		response.setContentType("application/json");
 		response.getWriter().print(resource);
 		response.getWriter().flush();

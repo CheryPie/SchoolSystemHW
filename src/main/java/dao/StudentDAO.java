@@ -18,11 +18,11 @@ public class StudentDAO {
 
 	public void create(Student student) {
 		em.getTransaction().begin();
-		if (student.getStudentId() != null) {
+		if (student.getStudentId() == null) {
 			em.persist(student);
 		} else {
 			em.merge(student);
-			em.persist(student);
+			//em.persist(student);
 		}
 		em.getTransaction().commit();
 	}

@@ -23,51 +23,16 @@
 	}
 
 	function drawRow(rowData, i) {
-		var row = $("<tr onclick='rowSelector(" + i + ");'/>")
+		var row = $("<tr onclick='rowSelector(" + (i + 1) + ");'/>")
 		$("#books_table").append(row);
 		row.append($("<td>" + rowData.firstName + "</td>"));
 		row.append($("<td>" + rowData.lastName + "</td>"));
 		row.append($("<td>" + rowData.fkNumber + "</td>"));
 		row.append($("<td>" + rowData.faculty.name + "</td>"));
-		row.append($("<td><form role=\"form\" action=\"StudentServlet\" method=\"post\"><input type=\"hidden\" name=\"deleted\" value=\""+rowData.studentId+"\"/><button type=\"submit\" class=\"btn btn-default\">Изтрий</button></form></td>"));
+		row
+				.append($("<td><form role=\"form\" action=\"StudentServlet\" method=\"post\"><input type=\"hidden\" name=\"deleted\" value=\""+rowData.studentId+"\"/><button type=\"submit\" class=\"btn btn-default\">Изтрий</button></form></td>"));
 	}
 </script>
-<!--  <script type="text/javascript">
-	function rowSelector() {
-		if (!document.getElementsByTagName || !document.createTextNode)
-			return;
-		var rows = document.getElementById('books_table').getElementsByTagName(
-				'tbody')[0].getElementsByTagName('tr');
-		for (i = 0; i < rows.length; i++) {
-			rows[i].onclick = function() {
-				var tds = rows[i].getElementByTagName('td');
-				document.getElementById('userName').value = tds[0].innerText;
-				document.getElementById('pwd').value = tds[1].innerText;
-				document.getElementById('conf_pwd').value = tds[2].innerText;
-			}
-		}
-	}
-</script>-->
-<!--  <script type="text/javascript">
-	function addRowHandlers() {
-		var table = document.getElementById("tableId");
-		var rows = table.getElementsByTagName("tr");
-		for (i = 0; i < rows.length; i++) {
-			var currentRow = table.rows[i];
-			var createClickHandler = function(row) {
-				return function() {
-					var tds = row.getElementsByTagName("td");
-					document.getElementById('userName').value = tds[0].innerText;
-					document.getElementById('pwd').value = tds[1].innerText;
-					document.getElementById('conf_pwd').value = tds[2].innerText;
-				};
-			};
-
-			currentRow.onclick = createClickHandler(currentRow);
-		}
-	}
-	window.onload = addRowHandlers();
-</script>-->
 <script type="text/javascript">
 	function rowSelector(index) {
 		var table = document.getElementById("books_table");
@@ -76,8 +41,71 @@
 		document.getElementById('userName').value = tds[2].innerHTML;
 		document.getElementById('pwd').value = tds[0].innerHTML;
 		document.getElementById('conf_pwd').value = tds[1].innerHTML;
-		document.getElementById('studentId').value = tds[3].getElementByTag("form").getElementByTag("input").value;
+		var cell = row.cells[4];
+		var form = cell.children[0];
+		var input = form.children[0];
+		var i_value = input.value;
+		cleanTables();
+		document.getElementById('studentId').value = i_value;
+		$.ajax({
+			url : '/Shit/CourseServlet?studentId=' + i_value + '&has=true',
+			type : "GET",
+			dataType : "json",
+			success : function(data, textStatus, jqXHR) {
+				drawCTable(data, i_value);
+			}
+		});
+		$.ajax({
+			url : '/Shit/CourseServlet?studentId=' + i_value + '&has=false',
+			type : "GET",
+			dataType : "json",
+			success : function(data, textStatus, jqXHR) {
+				drawNotCTable(data, i_value);
+			}
+		});
+	};
+	
+	function cleanTables(){
+		var table_has_course = document.getElementById("c_table");
+		while (table_has_course.rows.length != 1) {
+			table_has_course.deleteRow(1);
+		}
+		var table_not_has_course = document.getElementById("not_c_table");
+		while (table_not_has_course.rows.length != 1) {
+			table_not_has_course.deleteRow(1);
+		}
 	}
+
+	function drawCTable(data, id) {
+		for (var i = 0; i < data.length; i++) {
+			drawCRow(data[i], id);
+		}
+	};
+
+	function drawCRow(rowData, id) {
+		var row = $("<tr />");
+		$('#c_table').append(row);
+		row.append($("<td>" + rowData.name + "</td>"));
+		row.append($("<td>" + rowData.description + "</td>"));
+		row.append($("<td>" + rowData.credits + "</td>"));
+		row.append($("<td><form role=\"form\" action=\"RelationSCServlet?studentId="+id+"&delete=true\" method=\"post\"><input type=\"hidden\" name=\"course\" value=\""+rowData.courseId+"\"/><button type=\"submit\" class=\"btn btn-default\">Изтрий</button></form></td>"));
+	};
+	
+	
+	function drawNotCTable(data, id) {
+		for (var i = 0; i < data.length; i++) {
+			drawNotCRow(data[i], id);
+		}
+	};
+
+	function drawNotCRow(rowData, id) {
+		var row = $("<tr />");
+		$('#not_c_table').append(row);
+		row.append($("<td><form role=\"form\" action=\"RelationSCServlet?studentId="+id+"&create=true\" method=\"post\"><input type=\"hidden\" name=\"course\" value=\""+rowData.courseId+"\"/><button type=\"submit\" class=\"btn btn-default\">Добави</button></form></td>"));
+		row.append($("<td>" + rowData.name + "</td>"));
+		row.append($("<td>" + rowData.description + "</td>"));
+		row.append($("<td>" + rowData.credits + "</td>"));
+	};
 </script>
 <script type="text/javascript">
 	$.ajax({
@@ -97,35 +125,71 @@
 		});
 	}
 </script>
+
 </head>
 <body>
-	<h1 align="center">
-		<b>REGISTRATION FORM</b>
-	</h1>
+	<table>
+		<tr>
+			<td>
+				<h1 align="center">
+					<b>REGISTRATION FORM</b>
+				</h1>
+				<form role="form" action="StudentServlet" method="post">
+					<div class="form-group" style="width: 100px;">
+						<label for="userName">Факултетен:</label> <input type="text"
+							class="form-control" name="fkNumber" id="userName">
+					</div>
+					<div class="form-group" style="width: 100px;">
+						<label for="pwd">Име:</label> <input type="text"
+							class="form-control" name="firstName" id="pwd">
+					</div>
 
-	<form role="form" action="StudentServlet" method="post">
-		<div class="form-group">
-			<label for="userName">Факултетен:</label> <input type="text"
-				class="form-control" name="fkNumber" id="userName">
-		</div>
-		<div class="form-group">
-			<label for="pwd">Име:</label> <input type="text" class="form-control"
-				name="firstName" id="pwd">
-		</div>
-
-		<div class="form-group">
-			<label for="conf_pwd">Фамилия</label> <input type="text"
-				class="form-control" name="lastName" id="conf_pwd">
-		</div>
-		<div class="form-group">
-			<label for="dropdown">Факултет</label><select id="sel"
-				class="form_control" name="facultyId" id="dropdown">
-			</select>
-		</div>
-		<input type="hidden" name="studentId" />
-		<button type="reset" class="btn btn-default">Reset</button>
-		<button type="submit" class="btn btn-default">Submit</button>
-	</form>
+					<div class="form-group" style="width: 100px;">
+						<label for="conf_pwd">Фамилия</label> <input type="text"
+							class="form-control" name="lastName" id="conf_pwd">
+					</div>
+					<div class="form-group">
+						<label for="dropdown">Факултет</label><select id="sel"
+							class="form_control" name="facultyId" id="dropdown">
+						</select>
+					</div>
+					<input type="hidden" name="studentId" id="studentId" />
+					<button type="reset" class="btn btn-default">Reset</button>
+					<button type="submit" class="btn btn-default">Submit</button>
+				</form>
+			</td>
+			<td>
+				<div align="center">
+					<h1>Courses by student</h1>
+				</div>
+				<div align="right">
+					<table id="c_table" class="table" style="width: 600px;">
+						<tr>
+							<th>Име</th>
+							<th>Описание</th>
+							<th>Кредити</th>
+							<th>Изтрий</th>
+						</tr>
+					</table>
+				</div>
+			</td>
+			<td>
+				<div align="center">
+					<h1>Not taken Courses by student</h1>
+				</div>
+				<div align="right">
+					<table id="not_c_table" class="table" style="width: 600px;">
+						<tr>
+							<th>Добави</th>
+							<th>Име</th>
+							<th>Описание</th>
+							<th>Кредити</th>
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+	</table>
 	<div align="center">
 		<h1>All Students</h1>
 	</div>

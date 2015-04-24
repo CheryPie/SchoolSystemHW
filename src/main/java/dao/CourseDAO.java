@@ -1,5 +1,6 @@
 package dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -33,5 +34,23 @@ private EntityManager em;
 	
 	public Course find(Long id){
 		return em.find( Course.class,id);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Course> findByStudent(Long studentId){
+		if(studentId!=null){
+		    return em.createNativeQuery("select * from course where Course_Id in "
+		       		+ " (select course_id from student_course_rel where student_id="+studentId.toString()+")",Course.class).getResultList();
+		}
+		return new ArrayList<Course>();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<Course> findNotByStudent(Long studentId){
+		if(studentId!=null){
+		    return em.createNativeQuery("select * from course where Course_Id not in "
+		       		+ " (select course_id from student_course_rel where student_id="+studentId.toString()+")",Course.class).getResultList();
+		}
+		return new ArrayList<Course>();
 	}
 }
